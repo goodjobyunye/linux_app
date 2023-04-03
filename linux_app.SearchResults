@@ -1,0 +1,7 @@
+---- lcd_put_pixel Matches (6 in 0 files) ----
+operation.c (09_show_chinese) line 4640 :  * 函数名称： lcd_put_pixel
+operation.c (09_show_chinese) line 4649 : void lcd_put_pixel(int x, int y)
+lcd_put_ascii in operation.c (09_show_chinese) : 				lcd_put_pixel(x+7-b, y+i, color);
+lcd_put_ascii in operation.c (09_show_chinese) : 				lcd_put_pixel(x+7-b, y+i, 0); /* 黑 */
+lcd_put_chinese in operation.c (09_show_chinese) : 					lcd_put_pixel(x+j*8+7-b, y+i, color);				
+lcd_put_chinese in operation.c (09_show_chinese) : 					lcd_put_pixel(x+j*8+7-b, y+i, 0); /* 黑 */

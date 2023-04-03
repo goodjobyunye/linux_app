@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <stdlib.h>
 
 #define FONTDATAMAX 4096
 
@@ -4632,7 +4633,6 @@ unsigned int pixel_width;
 int fd_hzk16;
 struct stat hzk_stat;
 unsigned char *hzkmem;
-unsigned int color = 0xff0000;
 
 
 
@@ -4646,7 +4646,7 @@ unsigned int color = 0xff0000;
  * -----------------------------------------------
  * 2020/05/12	     V1.0	  zh(angenao)	      创建
  ***********************************************************************/ 
-void lcd_put_pixel(int x, int y)
+void lcd_put_pixel(int x, int y, unsigned int color)
 {
 	unsigned char *pen_8 = fbmem+y*line_width+x*pixel_width;
 	unsigned short *pen_16;	
@@ -4696,7 +4696,7 @@ void lcd_put_pixel(int x, int y)
  * -----------------------------------------------
  * 2020/05/12	     V1.0	  zh(angenao)	      创建
  ***********************************************************************/ 
-void lcd_put_ascii(int x, int y, unsigned char c)
+void lcd_put_ascii(int x, int y, unsigned char c, unsigned int color)
 {
 	unsigned char *dots = (unsigned char *)&fontdata_8x16[c*16];
 	int i, b;
@@ -4730,7 +4730,7 @@ void lcd_put_ascii(int x, int y, unsigned char c)
  * -----------------------------------------------
  * 2020/05/12	     V1.0	  zh(angenao)	      创建
  ***********************************************************************/ 
-void lcd_put_chinese(int x, int y, unsigned char *str)
+void lcd_put_chinese(int x, int y, unsigned char *str, unsigned int color)
 {
 	unsigned int area  = str[0] - 0xA1;
 	unsigned int where = str[1] - 0xA1;
@@ -4758,34 +4758,32 @@ void lcd_put_chinese(int x, int y, unsigned char *str)
 		}
 }
 
-void lcd_put_str(int x, int y, unsigned char *str)
+void lcd_put_str(int x, int y, unsigned char *str, unsigned int color)
 {
 	int len = strlen(str);
 	int i;
 	for (i = 0; i < len; i++)
 	{
-		if(str[i] < 0xA1) 
-		{
-			x += 8;
-		}
-		else 
-		{
-			x += 16;
-		}
-		if(x > var.xres) 
+		if(x >= var.xres) 
 		{
 			x = 0;
 			y += 16;
 		}
 		if(str[i] < 0xA1) 
 		{
-			lcd_put_ascii(x, y, str[i]);
-		}
-		else 
+			lcd_put_ascii(x, y, str[i], color);
+		} else 
 		{
-			lcd_put_chinese(x, y, str + i);
+			lcd_put_chinese(x, y, str + i, color);
+			i++;
 		}
-		
+		if(str[i] < 0xA1) 
+		{
+			x += 8;
+		} else 
+		{
+			x += 16;
+		}
 	}
 }
 int main(int argc, char **argv)
@@ -4836,11 +4834,12 @@ int main(int argc, char **argv)
 	/* 清屏: 全部设为黑色 */
 	memset(fbmem, 0, screen_size);
 
+	unsigned int color = 0xff0000;
    	if(argc == 2) 
    	{
 		color = strtoul(argv[1], NULL, 16);
    	}
-	lcd_put_str(var.xres, var.yres/2, str);
+	lcd_put_str(var.xres - 16, var.yres/2, str, color);
 
 	munmap(fbmem , screen_size);
 	close(fd_fb);
