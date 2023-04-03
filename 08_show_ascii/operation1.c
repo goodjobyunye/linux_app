@@ -4719,12 +4719,12 @@ void lcd_put_str(int x, int y, unsigned char *str)
 	int i;
 	for (i = 0; i < len; i++)
 	{
-		x += 8 * i;
-		if (x > var.xres) {
+		if (x >= var.xres) {
 			x = 0;
 			y += 16;
 		}
 		lcd_put_ascii(x, y, str[i]);
+		x += 8;
 	}
 }
 
@@ -4755,7 +4755,7 @@ int main(int argc, char **argv)
 	/* 清屏: 全部设为黑色 */
 	memset(fbmem, 0, screen_size);
 
-	lcd_put_str(var.xres/2, var.yres/2, argv[1]);
+	lcd_put_str(0, var.yres/2, argv[1]);
 	
 	munmap(fbmem , screen_size);
 	close(fd_fb);
